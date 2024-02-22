@@ -8,6 +8,7 @@ class MenuScreen(BaseScreen):
     def init(self):  # Функция "АнтиСпама"
         self.add_event(self.callback_start)
         self.add_event(self.callback_exit)
+        self.add_event(self.callback_setting)
 
     def render(self):  # Отрисовка (Рендер)
         self.png_main()
@@ -21,11 +22,15 @@ class MenuScreen(BaseScreen):
         if but_down[0]:
             if GUI_SETTINGS.WIDTH // 2 - 75 <= pos[0] <= GUI_SETTINGS.WIDTH // 2 + 75:
                 if (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 <= pos[1] <= ((GUI_SETTINGS.HEIGHT - 120 - 70) // 2) + 40:
-                    print(True)
-                else:
-                    print(False)
-            else:
-                print(False)
+                    print("старт доделать")
+
+    def callback_setting(self, e):
+        pos = pygame.mouse.get_pos()
+        but_down = pygame.mouse.get_pressed()
+        if but_down[0]:
+            if GUI_SETTINGS.WIDTH // 2 - 75 <= pos[0] <= GUI_SETTINGS.WIDTH // 2 + 75:
+                if (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 75 <= pos[1] <= (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 115:
+                    print("сетт доделать")
 
     def callback_exit(self, e):  # Проверка нажатия кнопки выхода, Выход из игры
         pos = pygame.mouse.get_pos()
@@ -55,7 +60,7 @@ class MenuScreen(BaseScreen):
                                                                (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 75))
     def png_exit(self):
         exit_png = pygame.image.load("quit.png")
-        exit_png.set_colorkey((255,255,255))
         exit_idle = pygame.transform.scale(exit_png, (150, 40))
+        exit_png.set_colorkey((255, 255, 255))
         self.manager_screen.main_game.screen.blit(exit_idle, (GUI_SETTINGS.WIDTH // 2 - 75,
                                                                (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 150))
