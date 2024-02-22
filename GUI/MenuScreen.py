@@ -1,4 +1,4 @@
-from .BaseScreen import BaseScreen
+from GUI.BaseScreen import BaseScreen
 import pygame
 from core.settings import GUI_SETTINGS
 
