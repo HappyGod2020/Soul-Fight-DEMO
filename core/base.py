@@ -2,10 +2,12 @@ from pygame import display, FULLSCREEN, event, QUIT, font
 from .settings import GUI_SETTINGS
 from .ManagerScreen import ManagerScreen
 from GUI.MenuScreen import MenuScreen
+from .create_server import StartServer
 
 
 class Game:
     def __init__(self):
+        self.start_server = StartServer()
         WIDTH = GUI_SETTINGS.WIDTH
         HEIGHT = GUI_SETTINGS.HEIGHT
         args = [(WIDTH, HEIGHT)]
@@ -36,5 +38,3 @@ class Game:
                 self.is_game = False
             for fun in self.event_array:
                 fun(e)
-
-
