@@ -23,6 +23,7 @@ class MenuScreen(BaseScreen):
             if GUI_SETTINGS.WIDTH // 2 - 75 <= pos[0] <= GUI_SETTINGS.WIDTH // 2 + 75:
                 if (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 <= pos[1] <= ((GUI_SETTINGS.HEIGHT - 120 - 70) // 2) + 40:
                     self.manager_screen.select_screen(BaseScreen)
+                    # старт базе скриин доделан, и это радует, как инчае то  ххахахахахахахахахаха
 
     def callback_setting(self, e):
         pos = pygame.mouse.get_pos()
