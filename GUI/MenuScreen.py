@@ -16,7 +16,7 @@ class MenuScreen(BaseScreen):
         self.png_setting()
         self.png_exit()
 
-    def callback_start(self, e):  # Проверка нажатия кнопки мыши
+    def callback_start(self, e):
         pos = pygame.mouse.get_pos()
         but_down = pygame.mouse.get_pressed()
         if but_down[0]:
