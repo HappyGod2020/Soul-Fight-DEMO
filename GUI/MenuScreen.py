@@ -1,4 +1,4 @@
-from .BaseScreen import BaseScreen
+from GUI.BaseScreen import BaseScreen
 import pygame
 from core.settings import GUI_SETTINGS
 
@@ -16,13 +16,14 @@ class MenuScreen(BaseScreen):
         self.png_setting()
         self.png_exit()
 
-    def callback_start(self, e):  # Проверка нажатия кнопки мыши
+    def callback_start(self, e):
         pos = pygame.mouse.get_pos()
         but_down = pygame.mouse.get_pressed()
         if but_down[0]:
             if GUI_SETTINGS.WIDTH // 2 - 75 <= pos[0] <= GUI_SETTINGS.WIDTH // 2 + 75:
                 if (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 <= pos[1] <= ((GUI_SETTINGS.HEIGHT - 120 - 70) // 2) + 40:
-                    print("старт доделать")
+                    self.manager_screen.select_screen(BaseScreen)
+                    # старт базе скриин доделан, и это радует, как инчае то  ххахахахахахахахахаха
 
     def callback_setting(self, e):
         pos = pygame.mouse.get_pos()
