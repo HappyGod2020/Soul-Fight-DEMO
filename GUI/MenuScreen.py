@@ -49,19 +49,21 @@ class MenuScreen(BaseScreen):
 
     def png_start(self):
         start_png = pygame.image.load("start.png")
-        start_png.set_colorkey((255,255,255))
+        start_png.set_colorkey((255, 255, 255))
         start_idle = pygame.transform.scale(start_png, (150, 40))
         self.manager_screen.main_game.screen.blit(start_idle, (GUI_SETTINGS.WIDTH // 2 - 75,
                                                                (GUI_SETTINGS.HEIGHT - 120 - 70) // 2))
+
     def png_setting(self):
         setting_png = pygame.image.load("setting.png")
-        setting_png.set_colorkey((255,255,255))
+        setting_png.set_colorkey((255, 255, 255))
         setting_idle = pygame.transform.scale(setting_png, (150, 40))
         self.manager_screen.main_game.screen.blit(setting_idle, (GUI_SETTINGS.WIDTH // 2 - 75,
-                                                               (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 75))
+                                                                 (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 75))
+
     def png_exit(self):
         exit_png = pygame.image.load("quit.png")
         exit_idle = pygame.transform.scale(exit_png, (150, 40))
         exit_png.set_colorkey((255, 255, 255))
         self.manager_screen.main_game.screen.blit(exit_idle, (GUI_SETTINGS.WIDTH // 2 - 75,
-                                                               (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 150))
+                                                              (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 + 150))

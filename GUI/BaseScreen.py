@@ -1,5 +1,7 @@
 from core.settings import GUI_SETTINGS
 import pygame
+from GUI.MenuScreen import MenuScreen
+
 
 class BaseScreen:
 
@@ -18,9 +20,9 @@ class BaseScreen:
         but_down = pygame.mouse.get_pressed()
         if but_down[0]:
             if GUI_SETTINGS.WIDTH // 2 - 75 <= pos[0] <= GUI_SETTINGS.WIDTH // 2 + 75:
-                if (GUI_SETTINGS.HEIGHT - 120 - 70) // 2 <= pos[1] <= ((GUI_SETTINGS.HEIGHT - 120 - 70) // 2) + 40:
-                    self.manager_screen.main_game.is_game = False
-
+                if (GUI_SETTINGS.HEIGHT - 200 - 70) // 2 <= pos[1] <= ((GUI_SETTINGS.HEIGHT - 200 - 70) // 2) + 40:
+                    print('выход в basescreen')
+                    self.manager_screen.select_screen(MenuScreen)
 
     def render(self):
         self.png_main()
@@ -39,4 +41,4 @@ class BaseScreen:
         start_png.set_colorkey((255, 255, 255))
         start_idle = pygame.transform.scale(start_png, (150, 40))
         self.manager_screen.main_game.screen.blit(start_idle, (GUI_SETTINGS.WIDTH // 2 - 75,
-                                                               (GUI_SETTINGS.HEIGHT - 120 - 70) // 2))
+                                                               (GUI_SETTINGS.HEIGHT - 200 - 70) // 2))
