@@ -35,7 +35,7 @@ class Entity(pygame.Rect):
         self.armor = armor
         self.inventory = inventory
         self.level = level
-        self.load_sprite(sprite)
+        # self.load_sprite(sprite)
         super().__init__(x, y, width, height)
 
     def load_sprite(self, path_img):

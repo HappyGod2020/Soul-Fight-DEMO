@@ -1,8 +1,7 @@
 from pygame import display, FULLSCREEN, event, QUIT, font
-from .settings import GUI_SETTINGS
-from .ManagerScreen import ManagerScreen
+from core.settings import GUI_SETTINGS
+from core.ManagerScreen import ManagerScreen
 from GUI.MenuScreen import MenuScreen
-
 
 class Game:
     def __init__(self):
@@ -17,8 +16,8 @@ class Game:
 
         self.event_array = []
 
-        self.manage_screen = ManagerScreen(self)
-        self.manage_screen.select_screen(MenuScreen)
+        self.manager_screen = ManagerScreen(self)  # Передача Game в ManagerScreen
+        self.manager_screen.select_screen(MenuScreen)  # Установка стартового экрана
 
         self.update()
 
@@ -27,7 +26,7 @@ class Game:
         while self.is_game:
             self.screen.fill((0, 0, 0))
             self.event_loop()
-            self.manage_screen.screen.render()
+            self.manager_screen.current_screen.render()
             display.update()
 
     def event_loop(self):
@@ -36,5 +35,3 @@ class Game:
                 self.is_game = False
             for fun in self.event_array:
                 fun(e)
-
-
