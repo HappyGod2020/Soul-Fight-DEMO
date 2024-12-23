@@ -15,14 +15,14 @@ class Platform(pygame.sprite.Sprite):
 
 class GameScreen(BaseScreen):
     def init(self):
-        self.player = Player(50, GUI_SETTINGS.HEIGHT - 100, 50, 50, "player_sprite.png")
+        self.player = Player(50, GUI_SETTINGS.HEIGHT - 100, GUI_SETTINGS.HEIGHT // 16, GUI_SETTINGS.HEIGHT // 16, "player_sprite.png")
         self.platforms = pygame.sprite.Group()
         self.load_map_from_csv("level1.csv")  # Загрузка карты
         self.add_event(self.handle_input)
 
     def load_map_from_csv(self, filepath):
         """Загрузка карты из CSV файла"""
-        tile_size = 50  # Размер одной плитки
+        tile_size = GUI_SETTINGS.HEIGHT // 15  # Размер одной плитки
         with open(filepath, newline='') as csvfile:
             reader = csv.reader(csvfile)
             for y, row in enumerate(reader):
@@ -32,10 +32,15 @@ class GameScreen(BaseScreen):
                         self.platforms.add(platform)
 
     def render(self):
-        self.screen.fill((135, 206, 250))  # Светло-голубой фон
-        self.platforms.draw(self.screen)
+        # Обновление игрока с передачей параметров ширины, высоты экрана и платформ
+        self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms)
+
+        # Отрисовка платформ
+        for platform in self.platforms:
+            self.screen.blit(platform.image, platform.rect)
+
+        # Отрисовка игрока
         self.screen.blit(self.player.image, self.player.rect)
-        self.player.update(self.platforms)
 
     def handle_input(self, event):
         """Обработка событий ввода"""
