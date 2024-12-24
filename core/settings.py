@@ -1,4 +1,3 @@
-
 class GUI_SETTINGS:
     WIDTH = 1366
     HEIGHT = 766
