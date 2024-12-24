@@ -2,17 +2,22 @@ import pygame
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, sprite_path="player_sprite.png"):
+    def __init__(self, x, y, width, height, sprite_path="Sprite/player_sprite.png"):
         super().__init__()
         self.image = pygame.image.load(sprite_path).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width, height))
         self.rect = self.image.get_rect(topleft=(x, y))
         self.velocity = pygame.math.Vector2(0, 0)
         self.speed = 2  # Скорость движения по горизонтали
-        self.gravity = 1
+        self.gravity = 0.5
         self.max_fall_speed = 2  # Максимальная скорость падения
-        self.jump_strength = -15
+        self.jump_strength = -10
         self.on_ground = False
+
+    def respawn(self, x, y):
+        """Респавн игрока в начальной позиции."""
+        self.rect.topleft = (x, y)
+        self.velocity = pygame.math.Vector2(0, 0)  # Сбрасываем скорость
 
     def move(self, screen_width, screen_height, platforms):
         """Перемещение игрока с учётом границ экрана и столкновений"""
@@ -63,10 +68,10 @@ class Player(pygame.sprite.Sprite):
 
     def apply_gravity(self):
         """Применение гравитации"""
-        if not self.on_ground:
-            self.velocity.y += self.gravity
-            if self.velocity.y > self.max_fall_speed:
-                self.velocity.y = self.max_fall_speed
+
+        self.velocity.y += self.gravity
+        if self.velocity.y > self.max_fall_speed:
+            self.velocity.y = self.max_fall_speed
 
     def jump(self):
         """Прыжок"""

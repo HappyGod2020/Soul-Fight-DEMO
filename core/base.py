@@ -4,6 +4,7 @@ from .ManagerScreen import ManagerScreen
 from GUI.MenuScreen import MenuScreen
 import pygame
 
+
 class Game:
     def __init__(self):
         pygame.init()  # Инициализация всех модулей Pygame

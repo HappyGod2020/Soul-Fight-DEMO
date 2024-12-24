@@ -15,16 +15,16 @@ class MenuScreen(BaseScreen):
         self.render_buttons()
 
     def render_background(self):
-        background = pygame.image.load("menu_background.png")
+        background = pygame.image.load("Sprite/menu_background.png")
         background = pygame.transform.scale(background, (GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT))
         self.screen.blit(background, (0, 0))
 
     def render_buttons(self):
-        start_button = pygame.image.load("start_button.png")
+        start_button = pygame.image.load("Sprite/start_button.png")
         start_button = pygame.transform.scale(start_button, (200, 50))
         self.screen.blit(start_button, (GUI_SETTINGS.WIDTH // 2 - 100, GUI_SETTINGS.HEIGHT // 2 - 50))
 
-        exit_button = pygame.image.load("exit_button.png")
+        exit_button = pygame.image.load("Sprite/exit_button.png")
         exit_button = pygame.transform.scale(exit_button, (200, 50))
         self.screen.blit(exit_button, (GUI_SETTINGS.WIDTH // 2 - 100, GUI_SETTINGS.HEIGHT // 2 + 20))
 
