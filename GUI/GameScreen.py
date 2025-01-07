@@ -9,7 +9,7 @@ from core.settings import GUI_SETTINGS
 
 
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, sprite_path="Sprite/блок1.2.png"):
+    def __init__(self, x, y, width, height, sprite_path="Sprite/tile.png"):
         super().__init__()
         self.image = pygame.image.load(sprite_path).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width, height))
