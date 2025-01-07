@@ -23,7 +23,8 @@ class GameScreen(BaseScreen):
         self.levels_folder = "levels"
         self.level_index = 1
         self.door = None
-        self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT // 16, height=GUI_SETTINGS.HEIGHT // 16)  # Начальная позиция игрока
+        self.height_block = self.width_block = GUI_SETTINGS.HEIGHT / 18
+        self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT / 19, height=GUI_SETTINGS.HEIGHT // 19)  # Начальная позиция игрока
         self.load_level()
         self.add_event(self.handle_input)
         self.clock = pygame.time.Clock()
@@ -42,18 +43,17 @@ class GameScreen(BaseScreen):
 
         with open(level_file, "r") as csvfile:
             reader = csv.reader(csvfile)
+
             for y, row in enumerate(reader):
                 for x, cell in enumerate(row):
-                    x_pos = x * 48
-                    y_pos = y * 48
                     if cell == "1":  # Платформа
-                        platform = Platform(x * 48, y * 48, 48, 48)  # Размеры платформ
+                        platform = Platform(x * self.width_block, y * self.height_block, self.width_block, self.height_block)  # Размеры платформ
                         self.platforms.append(platform)
                     elif cell == "2":  # Шипы
-                        spike = Spike(x * 48, y * 48, 48, 48)
+                        spike = Spike(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
                         self.spikes.append(spike)
                     elif cell == "3":  # Дверь
-                        self.door = Door(x * 48, y * 48, 48, 48)
+                        self.door = Door(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
     #
     # def load_map(self):
     #     """Загрузка карты из CSV файла."""
