@@ -36,6 +36,8 @@ class MenuScreen(BaseScreen):
                     self.manager_screen.select_screen(GameScreen)
 
     def callback_exit(self, event):
+        if isinstance(self.manager_screen.screen, GameScreen):
+            return
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             if GUI_SETTINGS.WIDTH // 2 - 100 <= x <= GUI_SETTINGS.WIDTH // 2 + 100:
