@@ -25,6 +25,7 @@ class GameScreen(BaseScreen):
         self.door = None
         self.height_block = self.width_block = GUI_SETTINGS.HEIGHT / 18
         self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT / 19, height=GUI_SETTINGS.HEIGHT // 19)  # Начальная позиция игрока
+        self.background = None  # Фон уровня
         self.load_level()
         self.add_event(self.handle_input)
         self.clock = pygame.time.Clock()
@@ -41,9 +42,13 @@ class GameScreen(BaseScreen):
         self.spikes.clear()
         self.door = None
 
+        # Загружаем фон уровня
+        self.background = pygame.image.load('Sprite/game_fon.png').convert_alpha()
+        self.background = pygame.transform.scale(self.background, (GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT))
+
+        # Загрузка объектов уровня
         with open(level_file, "r") as csvfile:
             reader = csv.reader(csvfile)
-
             for y, row in enumerate(reader):
                 for x, cell in enumerate(row):
                     if cell == "1":  # Платформа
@@ -54,27 +59,14 @@ class GameScreen(BaseScreen):
                         self.spikes.append(spike)
                     elif cell == "3":  # Дверь
                         self.door = Door(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
-    #
-    # def load_map(self):
-    #     """Загрузка карты из CSV файла."""
-    #     with open(filename, "r") as file:
-    #         reader = csv.reader(file)
-    #         for y, row in enumerate(reader):
-    #             for x, tile in enumerate(row):
-    #                 if tile == "1":  # Платформа
-    #                     platform = Platform(x * 50, y * 50, 50, 50)  # Размеры платформ
-    #                     self.platforms.append(platform)
-    #                 elif tile == "2":  # Шипы
-    #                     spike = Spike(x * 50, y * 50, 50, 50)
-    #                     self.spikes.append(spike)
-    #                 elif tile == "3":  # Дверь
-    #                     self.door = Door(x * 50, y * 50, 50, 50)
 
     def render(self):
-        # self.image = pygame.image.load('Sprite/страшный фон.png').convert_alpha()
-        # self.image = pygame.transform.scale(self.image, (1920, 1080))
-        # self.screen.blit(self.image, (0, 0))
         """Отрисовка игрового процесса."""
+        # Отрисовка фона
+        if self.background:
+            print(1)
+            self.screen.blit(self.background, (0, 0))
+
         # Отрисовка платформ
         for platform in self.platforms:
             self.screen.blit(platform.image, platform.rect)
@@ -116,11 +108,11 @@ class GameScreen(BaseScreen):
         """Обработка ввода с клавиатуры."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, 1)
+                self.player.move_left()
             elif event.key == pygame.K_d:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, 2)
+                self.player.move_right()
             elif event.key == pygame.K_SPACE:
                 self.player.jump()
         if event.type == pygame.KEYUP:
             if event.key in [pygame.K_a, pygame.K_d]:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, flag_stop=True)
+                self.player.stop()
