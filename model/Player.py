@@ -13,11 +13,12 @@ class Player(pygame.sprite.Sprite):
         self.max_speed_x = 5  # Скорость движения по горизонтали
         self.new_speed_x = 0
         self.new_speed_y = 0
-        self.player_boost = 50
-        self.spop_boost = 30
+        self.player_boost = 100
+        self.spop_boost = 600
         self.speed = 5
         self.g = 40
-        # self.max_fall_speed = 2  # Максимальная скорость падения
+        self.flag = False
+        self.flag1 = True
         self.jump_speed = 17
         self.on_ground = False
         self.clock = pygame.time.Clock()
@@ -32,7 +33,7 @@ class Player(pygame.sprite.Sprite):
         """Перемещение игрока с учётом границ экрана и столкновений"""
         # Горизонтальное движение
         self.rect.x += self.velocity.x
-
+        flag = False
         # Проверка столкновений по горизонтали
         for platform in platforms:
             if self.rect.colliderect(platform.rect):
@@ -51,19 +52,41 @@ class Player(pygame.sprite.Sprite):
         # Вертикальное движение
         self.rect.y += self.velocity.y
         # self.on_ground = False  # Сбрасываем флаг нахождения на земле
-
         # Проверка столкновений по вертикали
-        for platform in platforms:
-            if self.rect.colliderect(platform.rect):
+        for i in range(len(platforms)):
+            if self.rect.colliderect(platforms[i].rect):
                 if self.new_speed_y > 0:  # Падение вниз
-                    self.rect.bottom = platform.rect.top
+                    print('sefsefsefs')
+                    self.rect.bottom = platforms[i].rect.top
+                    if self.velocity.y != 1:
+                        self.on_ground = True
+                        flag = True
                     self.velocity.y = 0
                     self.new_speed_y = 0
-                    self.on_ground = True
                 elif self.new_speed_y < 0:  # Удар о потолок
-                    self.rect.top = platform.rect.bottom
+                    self.rect.top = platforms[i].rect.bottom
                 else:
-                    self.on_ground = True
+                    self.rect.bottom = platforms[i].rect.top
+                    if self.velocity.y != 1:
+                        self.on_ground = True
+                        flag = True
+                    self.velocity.y = 0
+                    self.new_speed_y = 0
+            # elif (platforms[i].rect.y - 4 <= self.rect.y + 48 <= platforms[i].rect.y + 4 and
+            #       (platforms[i].rect.x - 4 <= self.rect.x <= platforms[i].rect.x + 4 or
+            #        platforms[i].rect.x - 4 <= self.rect.x + 48 <= platforms[i].rect.x + 4) or
+            #         platforms[i].rect.x - 4 <= self.rect.x - 48 <= platforms[i].rect.x + 4):
+            #     if self.new_speed_y > 0:  # Падение вниз
+            #         self.on_ground = True
+            #         flag = True
+            #     elif self.new_speed_y < 0:  # Удар о потолок
+            #         pass
+            #     else:
+            #         self.on_ground = True
+            #         flag = True
+        if not flag and self.new_speed_x != 0:
+            self.on_ground = False
+            self.flag = False
 
         # Ограничение по вертикали
         if self.rect.top < 0:  # Верхняя граница
@@ -82,9 +105,9 @@ class Player(pygame.sprite.Sprite):
             self.move_flag = 0
         self.clock.tick(self.fps)
         self.move(screen_width, screen_height, platforms)
-        if (self.new_speed_y < 0 or (not self.on_ground)) and self.new_speed_x == 0:
+        if not self.on_ground and self.new_speed_x == 0:
             self.apply_gravity()
-        if (self.new_speed_y < 0 or (not self.on_ground)) and self.new_speed_x != 0:
+        if not self.on_ground and self.new_speed_x != 0:
             self.boll_movie()
         if self.move_flag == 2 and not flag_stop and self.on_ground:
             self.flag_stop = False
@@ -96,12 +119,14 @@ class Player(pygame.sprite.Sprite):
             self.stop()
             if self.new_speed_x == 0:
                 self.flag_stop = False
+        print(self.velocity.x, self.velocity.y, self.new_speed_x, self.new_speed_y, self.on_ground)
 
     def apply_gravity(self):
         """Применение гравитации"""
+        print(self.new_speed_y, self.on_ground)
         self.velocity.y += self.new_speed_y * 0.0125 + (self.g * 0.0125 ** 2) / 2
         self.new_speed_y += self.g * 0.0125
-        self.on_ground = False
+        self.flag = False
 
     def boll_movie(self):
         self.apply_gravity()
@@ -120,6 +145,8 @@ class Player(pygame.sprite.Sprite):
             self.new_speed_x -= self.player_boost * 0.0125
         else:
             self.velocity.x += self.new_speed_x * 0.0125
+        self.flag = False
+        # self.velocity.y = 1
 
     def move_right(self):
         """Движение вправо"""
@@ -128,6 +155,8 @@ class Player(pygame.sprite.Sprite):
             self.new_speed_x += self.player_boost * 0.0125
         else:
             self.velocity.x += self.new_speed_x * 0.0125
+        self.flag = False
+        # self.velocity.y = 1
 
     def stop(self):
         """Остановка"""
@@ -136,6 +165,8 @@ class Player(pygame.sprite.Sprite):
                 if self.new_speed_x - self.spop_boost * 0.0125 <= 0:
                     self.new_speed_x = 0
                     self.velocity.x = 0
+                    self.velocity.y = 1
+                    self.flag = True
                 else:
                     self.velocity.x += self.new_speed_x * 0.0125 - (self.spop_boost * 0.0125 ** 2) / 2
                     self.new_speed_x -= self.spop_boost * 0.0125
@@ -143,6 +174,8 @@ class Player(pygame.sprite.Sprite):
                 if self.new_speed_x + self.spop_boost * 0.0125 >= 0:
                     self.new_speed_x = 0
                     self.velocity.x = 0
+                    self.velocity.y = 1
+                    self.flag = True
                 else:
                     self.velocity.x += -self.new_speed_x * 0.0125 + (self.spop_boost * 0.0125 ** 2) / 2
                     self.new_speed_x += self.spop_boost * 0.0125
