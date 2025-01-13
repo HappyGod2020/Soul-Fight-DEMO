@@ -84,11 +84,6 @@ class GameScreen(BaseScreen):
             self.screen.blit(self.background, (0, 0))
 
         # Отрисовка платформ
-        if self.render_flag:
-            self.render_flag = False
-            self.image = pygame.image.load('Sprite/game_fon.png').convert_alpha()
-            self.image = pygame.transform.scale(self.image, (1920, 1080))
-        self.screen.blit(self.image, (0, 0))
         for platform in self.platforms:
             self.screen.blit(platform.image, platform.rect)
 
