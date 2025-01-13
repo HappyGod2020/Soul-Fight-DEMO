@@ -23,7 +23,8 @@ class GameScreen(BaseScreen):
         self.levels_folder = "levels"
         self.level_index = 1
         self.door = None
-        self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT // 16, height=GUI_SETTINGS.HEIGHT // 16)  # Начальная позиция игрока
+        self.render_flag = True
+        self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT // 18 - 2, height=GUI_SETTINGS.HEIGHT // 18 - 2)  # Начальная позиция игрока
         self.load_level()
         self.add_event(self.handle_input)
         self.clock = pygame.time.Clock()
@@ -71,11 +72,13 @@ class GameScreen(BaseScreen):
     #                     self.door = Door(x * 50, y * 50, 50, 50)
 
     def render(self):
-        # self.image = pygame.image.load('Sprite/страшный фон.png').convert_alpha()
-        # self.image = pygame.transform.scale(self.image, (1920, 1080))
-        # self.screen.blit(self.image, (0, 0))
         """Отрисовка игрового процесса."""
         # Отрисовка платформ
+        if self.render_flag:
+            self.render_flag = False
+            self.image = pygame.image.load('Sprite/game_fon.png').convert_alpha()
+            self.image = pygame.transform.scale(self.image, (1920, 1080))
+        self.screen.blit(self.image, (0, 0))
         for platform in self.platforms:
             self.screen.blit(platform.image, platform.rect)
 
