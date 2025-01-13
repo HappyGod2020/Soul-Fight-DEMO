@@ -141,11 +141,11 @@ class GameScreen(BaseScreen):
         """Обработка ввода с клавиатуры."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                self.player.move_left()
+                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, 1)
             elif event.key == pygame.K_d:
-                self.player.move_right()
+                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, 2)
             elif event.key == pygame.K_SPACE:
                 self.player.jump()
         if event.type == pygame.KEYUP:
             if event.key in [pygame.K_a, pygame.K_d]:
-                self.player.stop()
+                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, flag_stop=True)
