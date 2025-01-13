@@ -6,6 +6,9 @@ import csv
 from model.Spike import Spike
 from model.Door import Door
 from core.settings import GUI_SETTINGS
+from model.Coin import Coin
+from core.db_manager import DBManager
+import time
 
 
 class Platform(pygame.sprite.Sprite):
@@ -18,13 +21,20 @@ class Platform(pygame.sprite.Sprite):
 
 class GameScreen(BaseScreen):
     def init(self):
+        self.db_manager = DBManager()
+        self.start_time = time.time()
+        self.collected_coins = 0
         self.platforms = []
         self.spikes = []
+        self.coins = pygame.sprite.Group()
         self.levels_folder = "levels"
         self.level_index = 1
         self.door = None
-        self.render_flag = True
-        self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT // 18 - 2, height=GUI_SETTINGS.HEIGHT // 18 - 2)  # Начальная позиция игрока
+        self.height_block = self.width_block = GUI_SETTINGS.HEIGHT / 18
+        self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT / 19,
+                             height=GUI_SETTINGS.HEIGHT // 19)  # Начальная позиция игрока
+        self.background = None  # Фон уровня
+
         self.load_level()
         self.add_event(self.handle_input)
         self.clock = pygame.time.Clock()
@@ -41,44 +51,39 @@ class GameScreen(BaseScreen):
         self.spikes.clear()
         self.door = None
 
+        # Загружаем фон уровня
+        self.background = pygame.image.load('Sprite/game_fon.png').convert_alpha()
+        self.background = pygame.transform.scale(self.background, (GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT))
+
+        # Загрузка объектов уровня
         with open(level_file, "r") as csvfile:
             reader = csv.reader(csvfile)
             for y, row in enumerate(reader):
                 for x, cell in enumerate(row):
-                    x_pos = x * 48
-                    y_pos = y * 48
                     if cell == "1":  # Платформа
-                        platform = Platform(x * 48, y * 48, 48, 48)  # Размеры платформ
+                        platform = Platform(x * self.width_block, y * self.height_block, self.width_block,
+                                            self.height_block)  # Размеры платформ
                         self.platforms.append(platform)
                     elif cell == "2":  # Шипы
-                        spike = Spike(x * 48, y * 48, 48, 48)
+                        spike = Spike(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
                         self.spikes.append(spike)
                     elif cell == "3":  # Дверь
-                        self.door = Door(x * 48, y * 48, 48, 48)
-    #
-    # def load_map(self):
-    #     """Загрузка карты из CSV файла."""
-    #     with open(filename, "r") as file:
-    #         reader = csv.reader(file)
-    #         for y, row in enumerate(reader):
-    #             for x, tile in enumerate(row):
-    #                 if tile == "1":  # Платформа
-    #                     platform = Platform(x * 50, y * 50, 50, 50)  # Размеры платформ
-    #                     self.platforms.append(platform)
-    #                 elif tile == "2":  # Шипы
-    #                     spike = Spike(x * 50, y * 50, 50, 50)
-    #                     self.spikes.append(spike)
-    #                 elif tile == "3":  # Дверь
-    #                     self.door = Door(x * 50, y * 50, 50, 50)
+                        self.door = Door(x * self.width_block, y * self.height_block, self.width_block,
+                                         self.height_block)
+                    elif cell == "4":
+                        coin = Coin(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
+                        self.coins.add(coin)
 
     def render(self):
         """Отрисовка игрового процесса."""
+        font = pygame.font.SysFont("Arial", 24)
+        text = font.render(f"Монет собрано: {self.collected_coins}", True, (255, 255, 255))
+
+        # Отрисовка фона
+        if self.background:
+            self.screen.blit(self.background, (0, 0))
+
         # Отрисовка платформ
-        if self.render_flag:
-            self.render_flag = False
-            self.image = pygame.image.load('Sprite/game_fon.png').convert_alpha()
-            self.image = pygame.transform.scale(self.image, (1920, 1080))
-        self.screen.blit(self.image, (0, 0))
         for platform in self.platforms:
             self.screen.blit(platform.image, platform.rect)
 
@@ -90,6 +95,10 @@ class GameScreen(BaseScreen):
         if self.door:
             self.screen.blit(self.door.image, self.door.rect)
 
+        # Отрисовка монеток
+        for coin in self.coins:
+            self.screen.blit(coin.image, coin.rect)
+
         # Отрисовка игрока
         self.screen.blit(self.player.image, self.player.rect)
 
@@ -98,6 +107,7 @@ class GameScreen(BaseScreen):
 
         # Проверка на столкновения
         self.check_collisions()
+        self.screen.blit(text, (10, 10))
 
     def check_collisions(self):
         """Проверка столкновений игрока с шипами и дверью."""
@@ -106,11 +116,23 @@ class GameScreen(BaseScreen):
             if self.player.rect.colliderect(spike.rect):
                 self.player.respawn(50, 400)  # Спавн в начальной позиции
 
+        collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
+        for coin in collisions:
+            self.collect_coin()
         # Проверка столкновения с дверью
         if self.door and self.player.rect.colliderect(self.door.rect):
             self.next_level()
 
+    def collect_coin(self):
+        self.collected_coins += 1
+
     def next_level(self):
+        time_played = time.time() - self.start_time
+        formatted_time = time.strftime("%H:%M:%S", time.gmtime(time_played))
+        self.db_manager.update_time(formatted_time)
+        self.db_manager.update_coins(self.collected_coins)
+        self.collected_coins = 0
+        self.start_time = time.time()
         """Переключение на следующий уровень."""
         self.level_index += 1
         self.load_level()
@@ -119,11 +141,11 @@ class GameScreen(BaseScreen):
         """Обработка ввода с клавиатуры."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, 1)
+                self.player.move_left()
             elif event.key == pygame.K_d:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, 2)
+                self.player.move_right()
             elif event.key == pygame.K_SPACE:
                 self.player.jump()
         if event.type == pygame.KEYUP:
             if event.key in [pygame.K_a, pygame.K_d]:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, flag_stop=True)
+                self.player.stop()
