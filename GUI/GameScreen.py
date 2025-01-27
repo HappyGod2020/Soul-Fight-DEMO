@@ -43,9 +43,8 @@ class GameScreen(BaseScreen):
         """Загрузка текущего уровня из CSV."""
         level_file = os.path.join(self.levels_folder, f"level{self.level_index}.csv")
         if not os.path.exists(level_file):
-            print("Все уровни пройдены!")
-            pygame.quit()
-            exit()
+            from GUI.FinalScreen import FinalScreen
+            self.manager_screen.select_screen(FinalScreen)
         self.player.respawn(50, 400)
         self.platforms.clear()
         self.spikes.clear()
