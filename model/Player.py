@@ -5,6 +5,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, sprite_path="Sprite/player_sprite.png"):
         super().__init__()
         self.move_flag = 0
+        self.height = height
         self.flag_stop = False
         self.image = pygame.image.load(sprite_path).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width, height))
@@ -14,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.new_speed_x = 0
         self.last_speed_x = []
         self.new_speed_y = 0
+        self.count_coin = 0
         self.player_boost = 100
         self.spop_boost = 600
         self.speed = 5
@@ -22,6 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.hitting_the_left_wall_flag = False
         self.hitting_the_right_wall_flag = False
         self.hitting_the_floor_flag = False
+        self.render_platforms_close_flag = 0
         self.jump_speed = 17
         self.on_ground = False
         self.on_button = False
@@ -37,14 +40,10 @@ class Player(pygame.sprite.Sprite):
     def move(self, screen_width, screen_height, platforms, buttons):
         """Перемещение игрока с учётом границ экрана и столкновений"""
         # Горизонтальное движение
-        # print(self.new_speed_y)
         self.rect.x += self.velocity.x
         flag = False
         crossing_flag = False
         for i in range(len(platforms)):
-            # if self.rect.colliderect(platforms[i].rect):
-            # print(self.new_speed_y)
-            # if not crossing_flag:
             if (((platforms[i].rect.bottom >= self.rect.bottom >= platforms[i].rect.top and
                     (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                      platforms[i].rect.left < self.rect.left < platforms[i].rect.right) and self.new_speed_y >= 1)) or
@@ -52,9 +51,6 @@ class Player(pygame.sprite.Sprite):
                     platforms[i].rect.y - 4 <= self.rect.y + 48 <= platforms[i].rect.y + 4 and
                     (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                      platforms[i].rect.left < self.rect.left < platforms[i].rect.right)):
-                self.crossing_flag = False
-                crossing_flag = True
-                # print('падение при высокой скорости')
                 if self.new_speed_y > 0:  # Падение вниз
                     self.rect.bottom = platforms[i].rect.top
                     self.on_ground = True
@@ -69,12 +65,10 @@ class Player(pygame.sprite.Sprite):
                     self.velocity.y = 0
                     self.new_speed_y = 0
                     self.velocity.x = 0
-            elif (platforms[i].rect.bottom - 4 <= self.rect.top <= platforms[i].rect.bottom + 4 and
+            elif (platforms[i].rect.bottom >= self.rect.top >= platforms[i].rect.top and
                   (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                    platforms[i].rect.left < self.rect.left < platforms[i].rect.right)) and self.new_speed_y < 0:
-                self.crossing_flag = False
                 crossing_flag = True
-                # rint('удар о потолок при высокой скорости', self.new_speed_y)p
                 if self.new_speed_y < 0:  # Удар о потолок
                     self.rect.top = platforms[i].rect.bottom
                     self.velocity.y = 0
@@ -82,80 +76,45 @@ class Player(pygame.sprite.Sprite):
             elif (platforms[i].rect.y - 4 <= self.rect.y + 48 <= platforms[i].rect.y + 4 and
                     (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                      platforms[i].rect.left < self.rect.left < platforms[i].rect.right) and 0 < self.new_speed_y < 1):
-                # crossing_flag = True
-                self.crossing_flag = False
-                crossing_flag = True
-                # print('падение при низкой скорости')
                 if self.new_speed_y > 0:  # Падение вниз
                     self.on_ground = True
                     flag = True
                 else:
                     self.on_ground = True
                     flag = True
-            elif (platforms[i].rect.bottom - 4 <= self.rect.top <= platforms[i].rect.bottom + 4 and
+            elif (platforms[i].rect.bottom > self.rect.top > platforms[i].rect.top and
                       (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                        platforms[i].rect.left < self.rect.left < platforms[i].rect.right)): # Удар о потолок
-                self.crossing_flag = False
                 crossing_flag = True
-                # print('удар о потолок')
-                if self.new_speed_y == 2:
-                    self.new_speed_y = self.new_speed_y
-                    self.velocity.y = 0
-                    self.rect.top = platforms[i].rect.bottom
+                self.new_speed_y = -self.new_speed_y
+                self.velocity.y = 0
+                self.rect.top = platforms[i].rect.bottom
 
         for platform in platforms:
-            if self.rect.colliderect(platform.rect) and not self.crossing_flag and not crossing_flag:
-                self.crossing_flag = True
-                # print([platform.rect.bottom, self.rect.top, platform.rect.top + 4],
-                #          [platform.rect.bottom - 4, self.rect.bottom, platform.rect.top + 4])
+            if self.rect.colliderect(platform.rect) and not crossing_flag:
                 if (self.new_speed_x > 0 and
                         (platform.rect.bottom >= self.rect.top >= platform.rect.top or
                          platform.rect.bottom >= self.rect.bottom >= platform.rect.top)):  # Движение вправо
-                    # if not self.hitting_the_right_wall_flag and not self.hitting_the_left_wall_flag:
-                    self.hitting_the_right_wall_flag = True
+                    crossing_flag = True
                     self.rect.right = platform.rect.left
-                    # if -abs(self.new_speed_x) not in self.last_speed_x:
                     self.new_speed_x = -abs(self.new_speed_x)
+                    self.hitting_the_right_wall_flag = True
                     self.velocity.x = 0
                 elif (self.new_speed_x < 0 and
                       (platform.rect.bottom >= self.rect.top >= platform.rect.top or
                        platform.rect.bottom >= self.rect.bottom >= platform.rect.top)):  # Движение влево
-                    # if not self.hitting_the_left_wall_flag and not self.hitting_the_right_wall_flag:
+                    crossing_flag = True
                     self.rect.left = platform.rect.right
                     self.velocity.x = 0
-                    # if abs(self.new_speed_x) not in self.last_speed_x:
                     self.new_speed_x = abs(self.new_speed_x)
                     self.hitting_the_left_wall_flag = True
 
         for button in buttons:
-            if (button.rect.top <= self.rect.bottom < button.rect.bottom and
-                    ((self.rect.right > button.rect.left > self.rect.left) or
-                     (self.rect.left < button.rect.right < self.rect.right))):
+            if (button.rect.top - 4 <= self.rect.bottom <= button.rect.bottom + 4 and
+                    ((self.rect.right >= button.rect.left >= self.rect.left) or
+                     (self.rect.left <= button.rect.right <= self.rect.right))):
                 if self.rect.bottom <= button.rect.bottom:
-                    flag = True
                     self.on_button = True
-                    if self.new_speed_y > 0.5:
-                        self.velocity.y = 0
-                        self.new_speed_x = 0
-                        self.new_speed_y = 0
-                        self.velocity.x = 0
-                        self.rect.bottom = button.rect.top
-                        self.on_ground = True
-                        flag = True
-                    elif self.new_speed_y == 0:
-                        self.on_ground = True
-                        flag = True
-            elif self.rect.colliderect(button.rect) and self.new_speed_y != -17:
-                    if self.new_speed_x > 0:
-                        self.hitting_the_right_wall_flag = True
-                        self.rect.right = button.rect.left
-                        self.new_speed_x = 0
-                        self.velocity.x = 0
-                    if self.new_speed_x < 0:
-                        self.hitting_the_left_wall_flag = True
-                        self.rect.left = button.rect.right
-                        self.new_speed_x = 0
-                        self.velocity.x = 0
 
         # Вертикальное движение
         self.rect.y += self.velocity.y
@@ -167,7 +126,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.top < 0:  # Верхняя граница
             self.rect.top = 0
             self.velocity.y = 0
-            self.new_speed_y = - self.new_speed_y
+            self.new_speed_y = 4
         if self.rect.bottom > screen_height:  # Нижняя граница
             self.rect.bottom = screen_height - 48
             self.hitting_the_floor_flag = True
@@ -189,9 +148,10 @@ class Player(pygame.sprite.Sprite):
                 self.hitting_the_right_wall_flag = True
             self.velocity.x = 0
 
-    def update(self, screen_width, screen_height, platforms, platforms_close, buttons, move_flag=0, flag_stop=False):
-        # print(self.on_ground)
-        # print(self.new_speed_y)
+    def update(self, screen_width, screen_height, platforms, platform_close, buttons, count_coin, move_flag=0, flag_stop=False):
+        self.plaform_close = platform_close
+
+        self.count_coin = count_coin
         if len(self.last_speed_x) < 5:
             self.last_speed_x.append(self.new_speed_x)
         else:
@@ -205,6 +165,8 @@ class Player(pygame.sprite.Sprite):
             self.move_flag = 0
         self.clock.tick(self.fps)
         self.move(screen_width, screen_height, platforms, buttons)
+        k = screen_height / 576
+        self.render_platforms_close(k, screen_height)
         move_flag = False
         if not self.on_ground and self.new_speed_x == 0:
             self.apply_gravity()
@@ -224,10 +186,38 @@ class Player(pygame.sprite.Sprite):
             self.stop()
             if self.new_speed_x == 0:
                 self.flag_stop = False
-        # print(self.velocity.x, self.velocity.y, self.new_speed_x, self.new_speed_y, self.on_ground)
+
+    def render_platforms_close(self, k, screen_height):
+        if self.on_button or (not (self.level_index - 1)):
+            if self.level_index == 4:
+                if self.on_button and self.count_coin == 4:
+                    if self.plaform_close[0].rect.top > 0:
+                        for platform in self.plaform_close:
+                            platform.rect.y -= k / 2
+            else:
+                if self.plaform_close[0].rect.top > 0:
+                    for platform in self.plaform_close:
+                        platform.rect.y -= k / 2
+        else:
+            if self.level_index == 3:
+                if not self.render_platforms_close_flag:
+                    if self.plaform_close[-1].rect.bottom < screen_height / 18 * 5:
+                        for platform in self.plaform_close:
+                            platform.rect.y += k / 2
+                    else:
+                        self.plaform_close[0].rect.bottom = screen_height / 18 * 3
+        if self.render_platforms_close_flag < 5:
+            self.render_platforms_close_flag += 1
+        else:
+            self.render_platforms_close_flag = 0
+
+    def level(self, index):
+        self.level_index = index
+        self.count_coin = 0
 
     def apply_gravity(self):
         """Применение гравитации"""
+        self.on_button = False
         if self.new_speed_y == 0:
             self.flag = True
             self.hitting_the_right_wall_flag = False
@@ -243,6 +233,7 @@ class Player(pygame.sprite.Sprite):
                 self.new_speed_y = 30
 
     def boll_movie(self):
+        self.on_button = False
         self.apply_gravity()
         if not self.hitting_the_right_wall_flag and not self.hitting_the_left_wall_flag:
             self.velocity.x += self.new_speed_x / 2 * 0.0125
