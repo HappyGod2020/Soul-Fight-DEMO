@@ -31,6 +31,7 @@ class Button(pygame.sprite.Sprite):
 class GameScreen(BaseScreen):
     def init(self):
         self.db_manager = DBManager()
+        self.clock = pygame.time.Clock()
         self.start_time = time.time()
         self.collected_coins = 0
         self.platforms = []
@@ -55,6 +56,7 @@ class GameScreen(BaseScreen):
 
     def load_level(self):
         """Загрузка текущего уровня из CSV."""
+        self.player.death_flag = False
         level_file = os.path.join(self.levels_folder, f"level{self.level_index}.csv")
         if not os.path.exists(level_file):
             self.Flag = True
@@ -127,22 +129,24 @@ class GameScreen(BaseScreen):
         for button in self.buttons:
             self.screen.blit(button.image, button.rect)
 
-        # Отрисовка игрока
-        self.screen.blit(self.player.image, self.player.rect)
-
-        # Обновление игрока
-        self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close, self.buttons, count_coin=self.count_coin)
-
         # Проверка на столкновения
         self.check_collisions()
         self.screen.blit(text, (10, 10))
+
+        # Отрисовка игрока
+        self.screen.blit(self.player.image, self.player.rect)
+        if self.player.back_flag:
+            self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
+        # Обновление игрока
+        self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close, self.buttons, count_coin=self.count_coin)
 
     def check_collisions(self):
         """Проверка столкновений игрока с шипами и дверью."""
         # Проверка столкновения с шипами
         for spike in self.spikes:
-            if self.player.rect.colliderect(spike.rect):
-                self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)  # Спавн в начальной позиции
+            if self.player.rect.colliderect(spike.rect) and not self.player.death_flag:
+                self.player.death_flag = True
+                # self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)  # Спавн в начальной позиции
 
         for platforms in self.platforms_close:
             if (platforms.rect.bottom > self.player.rect.top and

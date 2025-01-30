@@ -2,20 +2,28 @@ import pygame
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, sprite_path="Sprite/player_sprite.png"):
+    def __init__(self, x, y, width, height, sprite_path="Sprite/idle.png"):
         super().__init__()
         self.move_flag = 0
         self.height = height
         self.flag_stop = False
         self.image = pygame.image.load(sprite_path).convert_alpha()
+        self.walk_igame = [pygame.image.load(f'Sprite/Walk00{str(i).zfill(2)}.png') for i in range(1, 13)]
+        self.death_igame = [pygame.image.load(f'Sprite/death{i}.png') for i in range(1, 5)]
+        self.walk_igame += [pygame.image.load("Sprite/idle.png")]
         self.image = pygame.transform.scale(self.image, (width, height))
+        self.width = width
         self.rect = self.image.get_rect(topleft=(x, y))
+        self.death_flag = False
+        self.back_flag = False
+        self.image_index = 0
         self.velocity = pygame.math.Vector2(0, 0)
         self.max_speed_x = 5  # Скорость движения по горизонтали
         self.new_speed_x = 0
         self.last_speed_x = []
         self.new_speed_y = 0
         self.count_coin = 0
+        self.death_image_index = 0
         self.player_boost = 100
         self.spop_boost = 600
         self.speed = 5
@@ -23,8 +31,10 @@ class Player(pygame.sprite.Sprite):
         self.flag = True
         self.hitting_the_left_wall_flag = False
         self.hitting_the_right_wall_flag = False
+        self.render_flag = False
         self.hitting_the_floor_flag = False
         self.render_platforms_close_flag = 0
+        self.render_player_flag = 1
         self.jump_speed = 17
         self.on_ground = False
         self.on_button = False
@@ -35,7 +45,12 @@ class Player(pygame.sprite.Sprite):
     def respawn(self, x, y):
         """Респавн игрока в начальной позиции."""
         self.rect.topleft = (x, y)
-        self.velocity = pygame.math.Vector2(0, 0)  # Сбрасываем скорость
+        self.back_flag = False
+        self.velocity = pygame.math.Vector2(0, 0)  # Сбрасываем вектор
+        self.image = pygame.transform.scale(self.walk_igame[12], (self.width, self.height))
+        self.death_image_index = 0
+        self.death_flag = False
+        self.image_index = 0
 
     def move(self, screen_width, screen_height, platforms, buttons):
         """Перемещение игрока с учётом границ экрана и столкновений"""
@@ -150,42 +165,85 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, screen_width, screen_height, platforms, platform_close, buttons, count_coin, move_flag=0, flag_stop=False):
         self.plaform_close = platform_close
-
-        self.count_coin = count_coin
-        if len(self.last_speed_x) < 5:
-            self.last_speed_x.append(self.new_speed_x)
-        else:
-            self.last_speed_x.append(self.new_speed_x)
-            self.last_speed_x = self.last_speed_x[1:]
-        """Обновление состояния игрока"""
-        if move_flag:
-            self.move_flag = move_flag
-        if flag_stop:
-            self.flag_stop = flag_stop
-            self.move_flag = 0
         self.clock.tick(self.fps)
-        self.move(screen_width, screen_height, platforms, buttons)
-        k = screen_height / 576
-        self.render_platforms_close(k, screen_height)
-        move_flag = False
-        if not self.on_ground and self.new_speed_x == 0:
-            self.apply_gravity()
-            move_flag = True
-        if not self.on_ground and self.new_speed_x != 0:
-            self.boll_movie()
-            move_flag = True
-        if (self.move_flag == 2 and not flag_stop and self.on_ground) or self.hitting_the_left_wall_flag:
-            self.flag_stop = False
-            self.move_right()
-            move_flag = True
-        if (self.move_flag == 1 and not flag_stop and self.on_ground) or self.hitting_the_right_wall_flag:
-            self.flag_stop = False
-            self.move_left()
-            move_flag = True
-        if (self.flag_stop and self.on_ground) or not move_flag:
-            self.stop()
-            if self.new_speed_x == 0:
+        if self.death_flag:
+            self.death_render()
+        else:
+            if self.render_flag == 3:
+                self.render_player()
+            if self.render_flag == 3:
+                self.render_flag = 0
+            else:
+                self.render_flag += 1
+            self.count_coin = count_coin
+            if len(self.last_speed_x) < 5:
+                self.last_speed_x.append(self.new_speed_x)
+            else:
+                self.last_speed_x.append(self.new_speed_x)
+                self.last_speed_x = self.last_speed_x[1:]
+            """Обновление состояния игрока"""
+            if move_flag:
+                self.move_flag = move_flag
+            if flag_stop:
+                self.flag_stop = flag_stop
+                self.move_flag = 0
+            self.move(screen_width, screen_height, platforms, buttons)
+            k = screen_height / 576
+            self.render_platforms_close(k, screen_height)
+            move_flag = False
+            if not self.on_ground and self.new_speed_x == 0:
+                self.apply_gravity()
+                move_flag = True
+            if not self.on_ground and self.new_speed_x != 0:
+                self.boll_movie()
+                move_flag = True
+            if (self.move_flag == 2 and not flag_stop and self.on_ground) or self.hitting_the_left_wall_flag:
                 self.flag_stop = False
+                self.move_right()
+                move_flag = True
+            if (self.move_flag == 1 and not flag_stop and self.on_ground) or self.hitting_the_right_wall_flag:
+                self.flag_stop = False
+                self.move_left()
+                move_flag = True
+            if (self.flag_stop and self.on_ground) or not move_flag:
+                self.stop()
+                if self.new_speed_x == 0:
+                    self.flag_stop = False
+
+    def render_player(self):
+        if self.new_speed_x > 0:
+            if abs(self.new_speed_y) <= 0.5:
+                if self.image_index < 11:
+                    self.image_index += 1
+                else:
+                    self.image_index = 0
+                self.image = pygame.transform.scale(self.walk_igame[self.image_index], (self.width, self.height))
+        elif self.new_speed_x < 0:
+            if abs(self.new_speed_y) <= 0.5:
+                if self.image_index < 11:
+                    self.image_index += 1
+                else:
+                    self.image_index = 0
+                self.image = pygame.transform.scale(pygame.transform.flip(self.walk_igame[self.image_index], True, False), (self.width, self.height))
+        else:
+            self.image = pygame.transform.scale(self.walk_igame[12], (self.width, self.height))
+
+    def death_render(self):
+        if self.render_player_flag == 15:
+            if self.new_speed_x <= 0:
+                self.image = pygame.transform.scale(self.death_igame[self.death_image_index], (self.width, self.height))
+            else:
+                self.image = pygame.transform.scale(pygame.transform.flip(self.death_igame[self.death_image_index], True, False), (self.width, self.height))
+            if self.death_image_index == 3:
+                self.death_flag = False
+                self.back_flag = True
+            else:
+                self.death_image_index += 1
+        else:
+            if self.render_player_flag < 15:
+                self.render_player_flag += 1
+            else:
+                self.render_player_flag = 0
 
     def render_platforms_close(self, k, screen_height):
         if self.on_button or (not (self.level_index - 1)):
