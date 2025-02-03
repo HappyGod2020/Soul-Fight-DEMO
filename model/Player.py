@@ -353,6 +353,7 @@ class Player(pygame.sprite.Sprite):
 
     def boll_movie(self):
         self.on_button = False
+
         self.apply_gravity()
         if not self.hitting_the_right_wall_flag and not self.hitting_the_left_wall_flag:
             self.velocity.x += self.new_speed_x / 2 * 0.0125
