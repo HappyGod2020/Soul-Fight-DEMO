@@ -1,7 +1,6 @@
 import os
 from GUI.BaseScreen import BaseScreen
 from model.Player import Player
-# from model.Button import Button
 import pygame
 import csv
 from model.Spike import Spike
@@ -38,6 +37,7 @@ class GameScreen(BaseScreen):
         self.platforms_close = []
         self.spikes = []
         self.buttons = []
+        self.under_button_block = []
         self.count_coin = 0
         self.coins = pygame.sprite.Group()
         self.levels_folder = "levels"
@@ -85,6 +85,8 @@ class GameScreen(BaseScreen):
                             self.platforms.append(platform)
                             if x == 28 and (y == 4 or y == 3 or y == 2):
                                 self.platforms_close.append(platform)
+                            if x in (16, 17, 18) and y == 5:
+                                self.under_button_block.append(platform)
                         elif cell == "2":  # Шипы
                             spike = Spike(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
                             self.spikes.append(spike)
@@ -129,6 +131,9 @@ class GameScreen(BaseScreen):
         for button in self.buttons:
             self.screen.blit(button.image, button.rect)
 
+        for platform in self.under_button_block:
+            self.screen.blit(platform.image, platform.rect)
+
         # Проверка на столкновения
         self.check_collisions()
         self.screen.blit(text, (10, 10))
@@ -143,15 +148,18 @@ class GameScreen(BaseScreen):
     def check_collisions(self):
         """Проверка столкновений игрока с шипами и дверью."""
         # Проверка столкновения с шипами
+        flag = True
         for spike in self.spikes:
-            if self.player.rect.colliderect(spike.rect) and not self.player.death_flag:
+            p = self.player.rect
+            s = spike.rect
+            if ((p.right - 10 > s.left and p.left < s.left) or (p.left < s.right - 10 and p.right > s.right)) and p.bottom >= s.top and p.top <= s.top + 20 and not self.player.death_flag:
                 self.player.death_flag = True
                 # self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)  # Спавн в начальной позиции
 
-        for platforms in self.platforms_close:
-            if (platforms.rect.bottom > self.player.rect.top and
-                    (self.player.rect.right > platforms.rect.left and self.player.rect.left < platforms.rect.right)):
-                self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
+        # for platforms in self.platforms_close:
+        if (self.platforms[-1].rect.bottom > self.player.rect.top and
+                (self.player.rect.right > self.platforms[-1].rect.left and self.player.rect.left < self.platforms[-1].rect.right)):
+            self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
 
         collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
         for coin in collisions:
