@@ -64,6 +64,7 @@ class GameScreen(BaseScreen):
             self.manager_screen.select_screen(FinalScreen)
         self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
         self.player.level(self.level_index)
+
         self.platforms.clear()
         self.spikes.clear()
         self.door = None

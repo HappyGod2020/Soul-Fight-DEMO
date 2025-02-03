@@ -2,6 +2,7 @@ import pygame
 from GUI.BaseScreen import BaseScreen
 
 
+
 class FinalScreen(BaseScreen):
     def init(self):
         self.add_event(self.handle_input)  # Добавляем обработку событий
@@ -26,12 +27,14 @@ class FinalScreen(BaseScreen):
             "Soul Fight DEMO v0.9",
             "Разработано с использованием Pygame",
             "Авторы: Муратов Богдан, Михайлов Вячеслав",
+
             "Благодарим за игру!"
         ]
         for i, line in enumerate(dev_info):
             line_rendered = self.small_font.render(line, True, (200, 200, 200))
             self.screen.blit(line_rendered,
                              (self.screen.get_width() // 2 - line_rendered.get_width() // 2, 180 + i * 30))
+
 
         # Инструкция
         instruction_text = self.small_font.render("Нажмите ESC, чтобы выйти в меню", True, (255, 255, 255))
@@ -43,3 +46,4 @@ class FinalScreen(BaseScreen):
             if event.key == pygame.K_ESCAPE:  # Возврат в главное меню
                 from GUI.MenuScreen import MenuScreen
                 self.manager_screen.select_screen(MenuScreen)
+
