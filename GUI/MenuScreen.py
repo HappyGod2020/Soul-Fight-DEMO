@@ -24,6 +24,10 @@ class MenuScreen(BaseScreen):
         start_button = pygame.transform.scale(start_button, (200, 50))
         self.screen.blit(start_button, (GUI_SETTINGS.WIDTH // 2 - 100, GUI_SETTINGS.HEIGHT // 2 - 50))
 
+        statist_button = pygame.image.load("Sprite/statist_button.png")
+        statist_button = pygame.transform.scale(statist_button, (200, 200))
+        self.screen.blit(statist_button, (GUI_SETTINGS.WIDTH // 2 + 200, GUI_SETTINGS.HEIGHT // 2 - 300))
+
         exit_button = pygame.image.load("Sprite/exit_button.png")
         exit_button = pygame.transform.scale(exit_button, (200, 50))
         self.screen.blit(exit_button, (GUI_SETTINGS.WIDTH // 2 - 100, GUI_SETTINGS.HEIGHT // 2 + 20))
