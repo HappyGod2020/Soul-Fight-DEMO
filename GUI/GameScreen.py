@@ -157,10 +157,12 @@ class GameScreen(BaseScreen):
             if ((p.right - 10 > s.left and p.left < s.left) or (p.left < s.right - 10 and p.right > s.right)) and p.bottom >= s.top and p.top <= s.top + 20 and not self.player.death_flag:
                 self.player.death_flag = True
                 # self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)  # Спавн в начальной позиции
+        if self.door and self.player.rect.colliderect(self.door.rect):
+            self.next_level()
 
         # for platforms in self.platforms_close:
         if (self.platforms[-1].rect.bottom > self.player.rect.top and
-                (self.player.rect.right > self.platforms[-1].rect.left and self.player.rect.left < self.platforms[-1].rect.right)):
+                (self.player.rect.right > self.platforms[-1].rect.left and self.player.rect.left < self.platforms[-1].rect.right)) and self.player.rect.right < GUI_SETTINGS.WIDTH / 32 * 31 and GUI_SETTINGS.HEIGHT / 18 * 3 < self.player.rect.bottom < GUI_SETTINGS.HEIGHT / 18 * 6.5:
             self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
 
         collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
@@ -168,8 +170,8 @@ class GameScreen(BaseScreen):
             self.collect_coin()
             self.count_coin += 1
         # Проверка столкновения с дверью
-        if self.door and self.player.rect.colliderect(self.door.rect):
-            self.next_level()
+        # if self.door and self.player.rect.colliderect(self.door.rect):
+        #     self.next_level()
 
     def collect_coin(self):
         self.collected_coins += 1
