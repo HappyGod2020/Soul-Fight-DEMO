@@ -44,8 +44,9 @@ class GameScreen(BaseScreen):
         self.level_index = 1
         self.door = None
         self.Flag = False
-        self.height_block = self.width_block = GUI_SETTINGS.HEIGHT / 18
-        self.player = Player(x=48, y=400, width=GUI_SETTINGS.HEIGHT // 18 - 2,
+        self.height_block = GUI_SETTINGS.HEIGHT / 18
+        self.width_block = GUI_SETTINGS.WIDTH / 32
+        self.player = Player(x=48, y=400, width=GUI_SETTINGS.WIDTH // 32 - 2,
                              height=GUI_SETTINGS.HEIGHT // 18 - 2)  # Начальная позиция игрока
         self.collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
         self.background = None  # Фон уровня
@@ -99,7 +100,7 @@ class GameScreen(BaseScreen):
                             self.coins.add(coin)
                         elif cell == '5':
                             platform = Platform(x * self.width_block, y * self.height_block, self.width_block,
-                                                self.height_block)  # Размеры платформ
+                                                self.height_block)  # Размеры кнопки
                             self.platforms.append(platform)
                             button = Button(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
                             self.buttons.append(button)
