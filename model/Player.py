@@ -67,6 +67,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += self.velocity.x
         flag = False
         crossing_flag = False
+        f = (screen_height / 18 * 3.2 > self.rect.bottom > 0 and screen_width / 32 * 28.2 > self.rect.right > screen_width / 32 * 27.8 and self.rect.left > screen_width / 32 * 26.8)
         for i in range(len(platforms)):
             if (((platforms[i].rect.bottom >= self.rect.bottom >= platforms[i].rect.top and
                     (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
@@ -75,44 +76,50 @@ class Player(pygame.sprite.Sprite):
                     platforms[i].rect.y - 4 <= self.rect.y + 48 <= platforms[i].rect.y + 4 and
                     (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                      platforms[i].rect.left < self.rect.left < platforms[i].rect.right)):
-                if self.new_speed_y > 0:  # Падение вниз
-                    self.rect.bottom = platforms[i].rect.top
-                    self.on_ground = True
-                    flag = True
-                    self.velocity.y = 0
-                    self.velocity.x = 0
-                    self.new_speed_y = 0
-                else:
-                    self.rect.bottom = platforms[i].rect.top
-                    self.on_ground = True
-                    flag = True
-                    self.velocity.y = 0
-                    self.new_speed_y = 0
-                    self.velocity.x = 0
+                if not f:
+                    crossing_flag = True
+                    if self.new_speed_y > 0:  # Падение вниз
+                        self.rect.bottom = platforms[i].rect.top
+                        self.on_ground = True
+                        flag = True
+                        self.velocity.y = 0
+                        self.velocity.x = 0
+                        self.new_speed_y = 0
+                    else:
+                        self.rect.bottom = platforms[i].rect.top
+                        self.on_ground = True
+                        flag = True
+                        self.velocity.y = 0
+                        self.new_speed_y = 0
+                        self.velocity.x = 0
             elif (platforms[i].rect.bottom >= self.rect.top >= platforms[i].rect.top and
                   (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                    platforms[i].rect.left < self.rect.left < platforms[i].rect.right)) and self.new_speed_y < 0:
-                crossing_flag = True
-                if self.new_speed_y < 0:  # Удар о потолок
-                    self.rect.top = platforms[i].rect.bottom
-                    self.velocity.y = 0
-                    self.new_speed_y = - self.new_speed_y
+                    if not f:
+                        crossing_flag = True
+                        if self.new_speed_y < 0:  # Удар о потолок
+                            self.rect.top = platforms[i].rect.bottom
+                            self.velocity.y = 0
+                            self.new_speed_y = - self.new_speed_y
             elif (platforms[i].rect.y - 4 <= self.rect.y + 48 <= platforms[i].rect.y + 4 and
                     (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                      platforms[i].rect.left < self.rect.left < platforms[i].rect.right) and 0 < self.new_speed_y < 1):
-                if self.new_speed_y > 0:  # Падение вниз
-                    self.on_ground = True
-                    flag = True
-                else:
-                    self.on_ground = True
-                    flag = True
+                    if not f:
+                        crossing_flag = True
+                        if self.new_speed_y > 0:  # Падение вниз
+                            self.on_ground = True
+                            flag = True
+                        else:
+                            self.on_ground = True
+                            flag = True
             elif (platforms[i].rect.bottom > self.rect.top > platforms[i].rect.top and
                       (platforms[i].rect.left < self.rect.right < platforms[i].rect.right or
                        platforms[i].rect.left < self.rect.left < platforms[i].rect.right)): # Удар о потолок
-                crossing_flag = True
-                self.new_speed_y = -self.new_speed_y
-                self.velocity.y = 0
-                self.rect.top = platforms[i].rect.bottom
+                if not f:
+                    crossing_flag = True
+                    self.new_speed_y = -self.new_speed_y
+                    self.velocity.y = 0
+                    self.rect.top = platforms[i].rect.bottom
         if not (GUI_SETTINGS.WIDTH / 32 * 16 <= self.rect.right <= GUI_SETTINGS.WIDTH / 32 * 19 and GUI_SETTINGS.HEIGHT / 18 * 3.5 <= self.rect.bottom <= GUI_SETTINGS.HEIGHT / 18 * 4.5):
             for platform in platforms:
                 if self.rect.colliderect(platform.rect) and not crossing_flag:
