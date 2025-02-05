@@ -29,6 +29,7 @@ class Button(pygame.sprite.Sprite):
 
 class GameScreen(BaseScreen):
     def init(self):
+        self.flag = True
         self.db_manager = DBManager()
         self.clock = pygame.time.Clock()
         self.start_time = time.time()
@@ -62,6 +63,7 @@ class GameScreen(BaseScreen):
         if not os.path.exists(level_file):
             self.Flag = True
             from GUI.FinalScreen import FinalScreen
+            self.flag = False
             self.manager_screen.select_screen(FinalScreen)
         self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
         self.player.level(self.level_index)
@@ -123,8 +125,8 @@ class GameScreen(BaseScreen):
             self.screen.blit(spike.image, spike.rect)
 
         # Отрисовка двери
-        if self.door:
-            self.screen.blit(self.door.image, self.door.rect)
+        # if self.door:
+        #     self.screen.blit(self.door.image, self.door.rect)
 
         # Отрисовка монеток
         for coin in self.coins:
@@ -161,9 +163,16 @@ class GameScreen(BaseScreen):
             self.next_level()
 
         # for platforms in self.platforms_close:
-        if (self.platforms[-1].rect.bottom > self.player.rect.top and
-                (self.player.rect.right > self.platforms[-1].rect.left and self.player.rect.left < self.platforms[-1].rect.right)) and self.player.rect.right < GUI_SETTINGS.WIDTH / 32 * 31 and GUI_SETTINGS.HEIGHT / 18 * 3 < self.player.rect.bottom < GUI_SETTINGS.HEIGHT / 18 * 6.5:
-            self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
+        # print()
+        if self.flag:
+            # plat = self.platforms_close[-1].rect
+            # p = self.player.rect
+            # print(plat.top < p.top < plat.bottom)
+            # print(((p.left > plat.left and p.right > plat.right) or (p.left > plat.right and p.right > plat.right)))
+            # if plat.top < p.top < plat.bottom and ((p.left > plat.left and p.right > plat.right) or (p.left > plat.right and p.right > plat.right)):
+            if self.player.rect.colliderect(self.platforms_close[-1].rect):
+                # self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
+                self.player.death_flag = True
 
         collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
         for coin in collisions:
