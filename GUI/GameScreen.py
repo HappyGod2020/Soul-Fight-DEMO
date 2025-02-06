@@ -29,6 +29,7 @@ class Button(pygame.sprite.Sprite):
 
 class GameScreen(BaseScreen):
     def init(self):
+        self.flag = True
         self.db_manager = DBManager()
         self.clock = pygame.time.Clock()
         self.start_time = time.time()
@@ -62,6 +63,7 @@ class GameScreen(BaseScreen):
         if not os.path.exists(level_file):
             self.Flag = True
             from GUI.FinalScreen import FinalScreen
+            self.flag = False
             self.manager_screen.select_screen(FinalScreen)
         self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
         self.player.level(self.level_index)
@@ -90,19 +92,22 @@ class GameScreen(BaseScreen):
                             if x in (16, 17, 18) and y == 5:
                                 self.under_button_block.append(platform)
                         elif cell == "2":  # Шипы
-                            spike = Spike(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
+                            spike = Spike(x * self.width_block, y * self.height_block, self.width_block,
+                                          self.height_block)
                             self.spikes.append(spike)
                         elif cell == "3":  # Дверь
                             self.door = Door(x * self.width_block, y * self.height_block, self.width_block,
                                              self.height_block)
                         elif cell == "4":
-                            coin = Coin(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
+                            coin = Coin(x * self.width_block, y * self.height_block, self.width_block,
+                                        self.height_block)
                             self.coins.add(coin)
                         elif cell == '5':
                             platform = Platform(x * self.width_block, y * self.height_block, self.width_block,
                                                 self.height_block)  # Размеры кнопки
                             self.platforms.append(platform)
-                            button = Button(x * self.width_block, y * self.height_block, self.width_block, self.height_block)
+                            button = Button(x * self.width_block, y * self.height_block, self.width_block,
+                                            self.height_block)
                             self.buttons.append(button)
 
     def render(self):
@@ -121,10 +126,6 @@ class GameScreen(BaseScreen):
         # Отрисовка шипов
         for spike in self.spikes:
             self.screen.blit(spike.image, spike.rect)
-
-        # Отрисовка двери
-        if self.door:
-            self.screen.blit(self.door.image, self.door.rect)
 
         # Отрисовка монеток
         for coin in self.coins:
@@ -145,26 +146,28 @@ class GameScreen(BaseScreen):
         if self.player.back_flag:
             self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
         # Обновление игрока
-        self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close, self.buttons, count_coin=self.count_coin)
+        self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close, self.buttons,
+                           count_coin=self.count_coin)
 
     def check_collisions(self):
         """Проверка столкновений игрока с шипами и дверью."""
         # Проверка столкновения с шипами
-        flag = True
         for spike in self.spikes:
             p = self.player.rect
             s = spike.rect
-            if ((p.right - 10 > s.left and p.left < s.left) or (p.left < s.right - 10 and p.right > s.right)) and p.bottom >= s.top and p.top <= s.top + 20 and not self.player.death_flag:
+            if ((p.right - 10 > s.left and p.left < s.left) or (
+                    p.left < s.right - 10 and p.right > s.right)) and p.bottom >= s.top and p.top <= s.top + 20 and not self.player.death_flag:
                 self.player.death_flag = True
                 # self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)  # Спавн в начальной позиции
         if self.door and self.player.rect.colliderect(self.door.rect):
             self.next_level()
 
-        # for platforms in self.platforms_close:
-        if not self.Flag:
-            if (self.platforms[-1].rect.bottom > self.player.rect.top and
-                    (self.player.rect.right > self.platforms[-1].rect.left and self.player.rect.left < self.platforms[-1].rect.right)) and self.player.rect.right < GUI_SETTINGS.WIDTH / 32 * 31 and GUI_SETTINGS.HEIGHT / 18 * 3 < self.player.rect.bottom < GUI_SETTINGS.HEIGHT / 18 * 6.5:
-                self.player.respawn(0, GUI_SETTINGS.HEIGHT / 18 * 10)
+
+        if self.flag:
+            if self.player.rect.colliderect(self.platforms_close[-1].rect):
+                self.player.death_flag = True
+
+
 
         collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
         for coin in collisions:
@@ -192,11 +195,14 @@ class GameScreen(BaseScreen):
         """Обработка ввода с клавиатуры."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close, self.buttons, move_flag=1, count_coin=self.count_coin)
+                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close,
+                                   self.buttons, move_flag=1, count_coin=self.count_coin)
             elif event.key == pygame.K_d:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close, self.buttons, move_flag=2, count_coin=self.count_coin)
+                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close,
+                                   self.buttons, move_flag=2, count_coin=self.count_coin)
             elif event.key == pygame.K_SPACE:
                 self.player.jump()
         if event.type == pygame.KEYUP:
             if event.key in [pygame.K_a, pygame.K_d]:
-                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close, self.buttons, flag_stop=True, count_coin=self.count_coin)
+                self.player.update(GUI_SETTINGS.WIDTH, GUI_SETTINGS.HEIGHT, self.platforms, self.platforms_close,
+                                   self.buttons, flag_stop=True, count_coin=self.count_coin)
