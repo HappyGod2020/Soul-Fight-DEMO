@@ -166,7 +166,7 @@ class GameScreen(BaseScreen):
 
 
         if self.flag:
-            if self.player.rect.colliderect(self.platforms_close[-1].rect):
+            if self.player.rect.colliderect(self.platforms_close[-1].rect) and abs(self.player.new_speed_y) < 4:
                 self.player.death_flag = True
 
 
