@@ -170,9 +170,7 @@ class GameScreen(BaseScreen):
         for coin in collisions:
             self.collect_coin()
             self.count_coin += 1
-        # Проверка столкновения с дверью
-        # if self.door and self.player.rect.colliderect(self.door.rect):
-        #     self.next_level()
+
 
     def collect_coin(self):
         self.collected_coins += 1
