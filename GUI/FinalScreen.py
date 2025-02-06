@@ -24,12 +24,11 @@ class FinalScreen(BaseScreen):
 
         # Техническая информация
         dev_info = [
-            "Soul Fight DEMO v0.9",
+            "Soul Fight v1.1.0",
             "Разработано с использованием Pygame",
             "Авторы: Муратов Богдан, Михайлов Вячеслав",
 
-            "Благодарим за игру!"
-        ]
+            "Благодарим за игру!"]
         for i, line in enumerate(dev_info):
             line_rendered = self.small_font.render(line, True, (200, 200, 200))
             self.screen.blit(line_rendered,

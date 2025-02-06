@@ -162,14 +162,18 @@ class GameScreen(BaseScreen):
         if self.door and self.player.rect.colliderect(self.door.rect):
             self.next_level()
 
+
         if self.flag:
             if self.player.rect.colliderect(self.platforms_close[-1].rect):
                 self.player.death_flag = True
+
+
 
         collisions = pygame.sprite.spritecollide(self.player, self.coins, True)
         for coin in collisions:
             self.collect_coin()
             self.count_coin += 1
+
 
     def collect_coin(self):
         self.collected_coins += 1
