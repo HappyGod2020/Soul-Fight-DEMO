@@ -24,7 +24,7 @@ class FinalScreen(BaseScreen):
 
         # Техническая информация
         dev_info = [
-            "Soul Fight v1.1.0",
+            "Soul Fight v1.1.1",
             "Разработано с использованием Pygame",
             "Авторы: Муратов Богдан, Михайлов Вячеслав",
 
