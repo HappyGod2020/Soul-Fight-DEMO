@@ -126,7 +126,9 @@ class GameScreen(BaseScreen):
         # Отрисовка шипов
         for spike in self.spikes:
             self.screen.blit(spike.image, spike.rect)
-
+        # Отрисовка двери
+        if self.door:
+            self.screen.blit(self.door.image, self.door.rect)
         # Отрисовка монеток
         for coin in self.coins:
             self.screen.blit(coin.image, coin.rect)
